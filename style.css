@@ -43,7 +43,17 @@
 
 .content__feedback {
     display: inline-block;
+    text-align: center;
     margin: 10px auto;
+}
+
+.content__feedback_type_error {
+    font-size: 10px;
+    color: red;
+}
+
+.content__feedback_type_success {
+    color: green;
 }
 
 .content__textarea {
