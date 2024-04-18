@@ -1,5 +1,5 @@
 <?php
-function PostDataHandler(): array
+function postDataHandler(): array
 {
     return [
         "dateOfBirth" => $_POST["dateOfBirth"],
@@ -12,60 +12,70 @@ function PostDataHandler(): array
     ];
 }
 
-function NameValidation(string $name): bool
+function validateName(string $name): bool
 {
     $regex = '/^([а-яА-ЯёЁ]+)$/su';
     return preg_match($regex, $name);
 }
 
-function EmailValidation(string $email): bool
+function validateEmail(string $email): bool
 {
     $regex = '/(^([a-zA-Z0-9][a-zA-Z0-9._-]{0,}[a-zA-Z0-9]{0,})@(?:[a-zA-Z0-9][a-zA-Z0-9_-]{0,}[a-zA-Z0-9]{0,}\.)+[a-zA-Z0-9][a-zA-Z0-9_-]{0,}[a-zA-Z0-9]{0,}$)/s';
     return preg_match($regex, $email);
 }
 
-function PhoneValidation(string $phone): bool
+function validatePhone(string $phone): bool
 {
     $regex = '/^(\+[0-9]{11})$/s';
     return preg_match($regex, $phone);
 }
 
-function HandleValidation(array $arUserData): array
+function validateMessage(string $message): bool
+{
+    return $message !== "";
+}
+
+function validateDateOfBirth(string $date): bool
+{
+    return strtotime($date) <= strtotime("now");
+}
+
+function handleValidation(array $arUserData): array
 {
     $arValidationErrors = [];
 
-    if (!PhoneValidation($arUserData["phone"])) {
-        $arValidationErrors["phone"] = "Поле не соответствует формату номера телефона";
+    if (!validatePhone($arUserData["phone"])) {
+        $arValidationErrors["phone"] = "Поле не соответствует формату номера телефона (+XXXXXXXXXXX)";
     }
 
-    if (!NameValidation($arUserData["surname"])) {
+    if (!validateName($arUserData["surname"])) {
         $arValidationErrors["surname"] = "Поле должно быть заполнено кириллицей";
     }
 
-    if (!NameValidation($arUserData["name"])) {
+    if (!validateName($arUserData["name"])) {
         $arValidationErrors["name"] = "Поле должно быть заполнено кириллицей";
     }
 
-    if (!NameValidation($arUserData["secondName"])) {
+    if (!validateName($arUserData["secondName"])) {
         $arValidationErrors["secondName"] = "Поле должно быть заполнено кириллицей";
     }
 
-    if (!EmailValidation($arUserData["email"])) {
+    if (!validateEmail($arUserData["email"])) {
         $arValidationErrors["email"] = "Поле не соответствует формату email";
     }
 
-    if (!$arUserData["message"]) {
+    if (!validateMessage($arUserData["message"])) {
         $arValidationErrors["message"] = "Сообщение не может быть пустым";
     }
 
-    if (strtotime($arUserData["dateOfBirth"]) > strtotime("now")) {
+    if (!validateDateOfBirth($arUserData["dateOfBirth"])) {
         $arValidationErrors["dateOfBirth"] = "День рождения не может быть в будущем!";
     }
 
     return $arValidationErrors;
 }
 
-function HandleError(string $key, array $arValidationErrors): string
+function handleError(string $key, array $arValidationErrors): string
 {
     if (array_key_exists($key, $arValidationErrors)) { 
         return $arValidationErrors[$key];
@@ -73,7 +83,7 @@ function HandleError(string $key, array $arValidationErrors): string
     return "";
 }
 
-function IsBirthdayToday(string $date): int
+function isBirthdayToday(string $date): int
 {
     $today = new DateTime();
     $targetDate = new DateTime($date);
@@ -81,27 +91,26 @@ function IsBirthdayToday(string $date): int
     $targetDate->setDate($today->format("Y"), $targetDate->format("m"), $targetDate->format("d"));
 
     $diff = $today->diff($targetDate);
-    
+
     if ($diff->invert) {
-        $targetDate->modify("+1 year");
-        $diff = $today->diff($targetDate);
+        return 365 - $diff->days;
     }
-    
+
     return $diff->days + 1;
 }
 
-function HandleIsBirthdayToday(array $arUserData): string
+function handleIsBirthdayToday(array $arUserData): string
 {
-    $isBirthdayToday = IsBirthdayToday($arUserData["dateOfBirth"]);
+    $daysTilBirthday = isBirthdayToday($arUserData["dateOfBirth"]);
 
-    if ($isBirthdayToday === 365) {
+    if ($daysTilBirthday === 365) {
         return " С Днем Рождения, " . $arUserData["name"] . "!";
     } else {
-        return " До Вашего Дня Рождения " . $isBirthdayToday . " дней.";
+        return " До Вашего Дня Рождения " . $daysTilBirthday . " дней.";
     }
 }
 
-function SendEmail(array $arUserData): bool
+function sendEmail(array $arUserData): bool
 {
     $username = "Rti2paBWiMuH";
     $password = "H2kB2ibz5zMR";
