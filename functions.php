@@ -14,7 +14,7 @@ function PostDataHandler(): array
 
 function NameValidation(string $name): bool
 {
-    $regex = '/^([а-яА-ЯёЁ]+)$/s';
+    $regex = '/^([а-яА-ЯёЁ]+)$/su';
     return preg_match($regex, $name);
 }
 
@@ -59,7 +59,7 @@ function HandleValidation(array $arUserData): array
     }
 
     if (strtotime($arUserData["dateOfBirth"]) > strtotime("now")) {
-        $arUserData["dateOfBirth"] = "День рождения не может быть в будущем!";
+        $arValidationErrors["dateOfBirth"] = "День рождения не может быть в будущем!";
     }
 
     return $arValidationErrors;
@@ -97,7 +97,7 @@ function HandleIsBirthdayToday(array $arUserData): string
     if ($isBirthdayToday === 365) {
         return " С Днем Рождения, " . $arUserData["name"] . "!";
     } else {
-        return " До Вашего Дня Рождения " . $isBirthdayToday . " дней";
+        return " До Вашего Дня Рождения " . $isBirthdayToday . " дней.";
     }
 }
 

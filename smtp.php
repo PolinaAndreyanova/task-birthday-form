@@ -78,8 +78,6 @@ class SendMailSmtpClass
                 throw new Exception('Autorization error');
             }
 
-
-
             fputs($socket, base64_encode($this->smtp_username) . "\r\n");
             if (!$this->_parseServer($socket, "334")) {
                 fclose($socket);
